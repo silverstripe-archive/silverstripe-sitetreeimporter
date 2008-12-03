@@ -7,6 +7,14 @@ class SiteTreeImporter extends Page_Controller {
 		'complete'
 	);
 
+	function __construct() {
+		$dataRecord = new Page();
+		$dataRecord->Title = $this->Title();
+		$dataRecord->URLSegment = get_class($this);
+		$dataRecord->ID = -1;
+		parent::__construct($dataRecord);
+	}
+
 	function init() {
 		parent::init();
 		if(!Permission::check('ADMIN')) Security::permissionFailure();
