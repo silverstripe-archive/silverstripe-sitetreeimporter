@@ -43,7 +43,7 @@ Products
 		iPhone
 </pre>
 
-<p><b>Note:</b>Please make sure that your file contains actual tab characeter (rather than sequences of spaces), and that there
+<p><b>Note:</b> Please make sure that your file contains actual tab characeter (rather than sequences of spaces), and that there
 is a page called 'Home'.</p>
 HTML;
 	}
