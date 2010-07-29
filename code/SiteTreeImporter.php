@@ -64,8 +64,9 @@ HTML;
 
 
 		if(isset($data['DeleteExisting']) && $data['DeleteExisting']) {
-			DB::query("DELETE FROM SiteTree");
-			DB::query("DELETE FROM SiteTree_Live");
+			// TODO Remove subtables
+			DB::query('DELETE FROM "SiteTree"');
+			DB::query('DELETE FROM "SiteTree_Live"');
 		}
 		
 		Versioned::reading_stage('Stage');
