@@ -76,8 +76,40 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$importer = singleton('SiteTreeImporter');
 		$importer->bulkimport($data, null);
 		
-		$this->assertType('SiteTree', DataObject::get_one('SiteTree', "`Title` = 'Parent1'"));
-		$this->assertFalse(DataObject::get_one('SiteTree', "`Title` = 'ShouldBeDeleted'"));
+		$this->assertType('SiteTree', DataObject::get_one('SiteTree', "\"Title\" = 'Parent1'"));
+		$this->assertFalse(DataObject::get_one('SiteTree', "\"Title\" = 'ShouldBeDeleted'"));
+	}
+	
+	function testImportSkipsComments() {
+		$data = array();
+		$data['SourceFile'] = array();
+		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
+		
+		$importer = singleton('SiteTreeImporter');
+		$importer->bulkimport($data, null);
+		
+		$commentPage = DataObject::get_one('SiteTree', "\"Title\" = '# Comments are skipped'");
+		$this->assertFalse($commentPage);
+	}
+	
+	function testImportWithURLSegment() {
+		// create sample record
+		$page = new SiteTree();
+		$page->Title = 'ShouldBeExisting';
+		$page->URLSegment = 'existing';
+		$page->write();
+		$page->publish('Stage', 'Live');
+		
+		$data = array();
+		$data['SourceFile'] = array();
+		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
+		
+		$importer = singleton('SiteTreeImporter');
+		$importer->bulkimport($data, null);
+		
+		$child2_2 = DataObject::get_one('SiteTree', "\"Title\" = 'Child2_2'");
+		$this->assertType('SiteTree', $child2_2);
+		$this->assertEquals($child2_2->URLSegment, 'existing');
 	}
 }
 ?>

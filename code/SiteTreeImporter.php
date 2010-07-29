@@ -74,12 +74,25 @@ HTML;
 		$parentRefs = array();
 
 		while($line = fgets($fh, 10000)) {
+			// Skip comments
+			if(preg_match('/^#/', $line)) continue;
+			
 			if(preg_match("/^(\t*)([^\t].*)/", $line, $matches)) {
 				$numTabs = strlen($matches[1]);
 				$title = trim($matches[2]);
 				
-				$newPage = new Page();
+				preg_match('/(.*) \(URLSegment: (.*)\)/', $title, $matches);
+				if($matches) {
+					$title = $matches[1];
+					$urlsegment = $matches[2];
+				} else {
+					$urlsegment = null;
+				}
+
+				$newPage = ($urlsegment) ? DataObject::get_one('SiteTree', sprintf('"URLSegment" = \'%s\'', $urlsegment)) : null;
+				if(!$newPage) $newPage = new Page();
 				$newPage->Title = $title;
+				$newPage->URLSegment = $urlsegment;
 				
 				// If we've got too many tabs, then outdent until we find a page to attach to.
 				while(!isset($parentRefs[$numTabs-1]) && $numTabs > 0) $numTabs--;
@@ -88,8 +101,11 @@ HTML;
 				if($numTabs > 0) $newPage->ParentID = $parentRefs[$numTabs-1];
 
 				$newPage->write();
-				if(isset($data['PublishAll']) && $data['PublishAll']) $newPage->doPublish();
-				echo "<li>Written #$newPage->ID: $newPage->Title (child of $newPage->ParentID)</li>";
+				if(isset($data['PublishAll']) && $data['PublishAll']) $newPage->publish('Stage', 'Live');
+
+				if(!SapphireTest::is_running_test()) {
+					echo"<li>Written #$newPage->ID: $newPage->Title (child of $newPage->ParentID)</li>";
+				}
 
 				// Populate parentRefs with the most recent page at every level.   Necessary to build tree
 				// Children of home should be placed at the top level
