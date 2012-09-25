@@ -1,0 +1,17 @@
+{
+	"name": "silverstripe-labs/sitetreeimporter",
+	"description": "The site tree import module lets you take a tabbed out file of
+		the following format, and load it into your CMS as a site tree.",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe-labs", "sitetreeimporter", "files"],
+	"authors": [
+	{
+		"name": "Sam Minnée",
+		"email": "sam@silverstripe.com"
+	}
+	],
+	"require":
+	{
+		"silverstripe/framework": "2.4.*"
+	}
+}
