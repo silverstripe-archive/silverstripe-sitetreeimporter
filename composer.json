@@ -1,0 +1,18 @@
+{
+	"name": "silverstripe/sitetreeimporter",
+	"description": "Build SilverStripe site tree from tabbed-out text file",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe"],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Sam Minnee",
+			"email": "sam@silverstripe.com"
+		}
+	],
+	"require":
+	{
+		"silverstripe/framework": "3.*",
+		"silverstripe/cms": "3.*"
+	}
+}
