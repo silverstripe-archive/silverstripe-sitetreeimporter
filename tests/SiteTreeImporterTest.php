@@ -26,13 +26,13 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$child2_2 = DataObject::get_one('SiteTree', "\"Title\" = 'Child2_2'");
 		$grandchild2_1_1 = DataObject::get_one('SiteTree', "\"Title\" = 'Grandchild2_1_1'");
 		
-		$this->assertType('SiteTree', $existing);
-		$this->assertType('SiteTree', $parent1);
-		$this->assertType('SiteTree', $parent2);
-		$this->assertType('SiteTree', $parent3);
-		$this->assertType('SiteTree', $child2_1);
-		$this->assertType('SiteTree', $child2_2);
-		$this->assertType('SiteTree', $grandchild2_1_1);
+		$this->assertInstanceOf('SiteTree', $existing);
+		$this->assertInstanceOf('SiteTree', $parent1);
+		$this->assertInstanceOf('SiteTree', $parent2);
+		$this->assertInstanceOf('SiteTree', $parent3);
+		$this->assertInstanceOf('SiteTree', $child2_1);
+		$this->assertInstanceOf('SiteTree', $child2_2);
+		$this->assertInstanceOf('SiteTree', $grandchild2_1_1);
 		$this->assertEquals($parent2->ID, $child2_1->ParentID);
 		$this->assertEquals($parent2->ID, $child2_2->ParentID);
 		$this->assertEquals($child2_1->ID, $grandchild2_1_1->ParentID);
@@ -54,12 +54,12 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$child2_2 = Versioned::get_one_by_stage('SiteTree', 'Live', "\"Title\" = 'Child2_2'");
 		$grandchild2_1_1 = Versioned::get_one_by_stage('SiteTree', 'Live', "\"Title\" = 'Grandchild2_1_1'");
 		
-		$this->assertType('SiteTree', $parent1);
-		$this->assertType('SiteTree', $parent2);
-		$this->assertType('SiteTree', $parent3);
-		$this->assertType('SiteTree', $child2_1);
-		$this->assertType('SiteTree', $child2_2);
-		$this->assertType('SiteTree', $grandchild2_1_1);
+		$this->assertInstanceOf('SiteTree', $parent1);
+		$this->assertInstanceOf('SiteTree', $parent2);
+		$this->assertInstanceOf('SiteTree', $parent3);
+		$this->assertInstanceOf('SiteTree', $child2_1);
+		$this->assertInstanceOf('SiteTree', $child2_2);
+		$this->assertInstanceOf('SiteTree', $grandchild2_1_1);
 	}
 	
 	function testImportDeleteExisting() {
@@ -76,7 +76,7 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$importer = singleton('SiteTreeImporter');
 		$importer->bulkimport($data, null);
 		
-		$this->assertType('SiteTree', DataObject::get_one('SiteTree', "\"Title\" = 'Parent1'"));
+		$this->assertInstanceOf('SiteTree', DataObject::get_one('SiteTree', "\"Title\" = 'Parent1'"));
 		$this->assertFalse(DataObject::get_one('SiteTree', "\"Title\" = 'ShouldBeDeleted'"));
 	}
 	
@@ -108,7 +108,7 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$importer->bulkimport($data, null);
 		
 		$child2_2 = DataObject::get_one('SiteTree', "\"Title\" = 'Child2_2'");
-		$this->assertType('SiteTree', $child2_2);
+		$this->assertInstanceOf('SiteTree', $child2_2);
 		$this->assertEquals($child2_2->URLSegment, 'existing');
 	}
 }
