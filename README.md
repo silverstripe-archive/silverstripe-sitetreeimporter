@@ -1,5 +1,7 @@
 # Site Tree Importer Module
 
+[![Build Status](https://secure.travis-ci.org/silverstripe-labs/silverstripe-sitetreeimporter.png?branch=master)](http://travis-ci.org/silverstripe-labs/silverstripe-sitetreeimporter)
+
 ## Maintainer Contact
 
  * Sam Minnee (Nickname: sminnee) 

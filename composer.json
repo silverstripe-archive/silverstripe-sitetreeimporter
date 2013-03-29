@@ -1,0 +1,16 @@
+{
+	"name": "silverstripe/sitetreeimporter",
+	"description": "Imports indented plaintext files into a SilverStripe sitetree",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "import"],
+	"authors": [
+		{
+			"name": "Sam Minnée",
+			"email": "sam@silverstripe.com"
+		}
+	],
+	"require":
+	{
+		"silverstripe/framework": "2.4,~3.0"
+	}
+}
