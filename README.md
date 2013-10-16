@@ -9,7 +9,7 @@
 
 ## Requirements
  
- * SilverStripe 2.4.0 or later
+ * SilverStripe 3.0 or later
 
 ## Installation
 
