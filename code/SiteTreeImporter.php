@@ -50,11 +50,11 @@ HTML;
 	}
 	
 	function Form() {
-		return new Form($this, "Form", new FieldSet(
+		return new Form($this, "Form", new FieldList(
 			new FileField("SourceFile", "Tab-delimited file"),
 			new CheckboxField("DeleteExisting", "Clear out all existing content?"),
 			new CheckboxField("PublishAll", "Publish everything after the import?")
-		), new FieldSet(
+		), new FieldList(
 			new FormAction("bulkimport", "Import pages")
 		));
 	}
@@ -76,11 +76,14 @@ HTML;
 		while($line = fgets($fh, 10000)) {
 			// Skip comments
 			if(preg_match('/^#/', $line)) continue;
-			
+
 			if(preg_match("/^(\t*)([^\t].*)/", $line, $matches)) {
 				$numTabs = strlen($matches[1]);
 				$title = trim($matches[2]);
-				
+
+				// skip empty lines/titles
+				if(empty($title)) continue;
+
 				preg_match('/(.*) \(URLSegment: (.*)\)/', $title, $matches);
 				if($matches) {
 					$title = $matches[1];
