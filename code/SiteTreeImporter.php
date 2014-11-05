@@ -50,11 +50,11 @@ HTML;
 	}
 	
 	function Form() {
-		return new Form($this, "Form", new FieldSet(
+		return new Form($this, "Form", new FieldList(
 			new FileField("SourceFile", "Tab-delimited file"),
 			new CheckboxField("DeleteExisting", "Clear out all existing content?"),
 			new CheckboxField("PublishAll", "Publish everything after the import?")
-		), new FieldSet(
+		), new FieldList(
 			new FormAction("bulkimport", "Import pages")
 		));
 	}
