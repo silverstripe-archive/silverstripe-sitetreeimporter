@@ -3,5 +3,5 @@ Parent1
 Parent2
 	Child2_1
 		Grandchild2_1_1
-	Child2_2 (URLSegment: existing)
+	Child2_2 {"URLSegment": "existing", "LegacyURL": "child2_1"}
 Parent3
