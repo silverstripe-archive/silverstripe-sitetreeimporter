@@ -58,7 +58,7 @@ Home
 ### Redirect URLs
 
 Often an existing tree will need to be imported with URLs which map to different URLs on the new site.
-While you could assign those manually to a `.htaccess` based redirect, we found it useful to 
+While you could assign those manually to a `.htaccess` based redirect, we found it useful to
 store the old URL straight in the `Page` object, and use SilverStripe's routing to handle the redirect.
 
 In this example, we'll use the ["redirected urls" module](http://addons.silverstripe.org/add-ons/silverstripe/redirectedurls),
@@ -76,11 +76,11 @@ class Page extends SiteTree {
 
 		$url = RedirectedURL::get()->find('FromBase', $legacyUrl);
 		if(!$url) {
-			$url = new RedirectedURL();	
+			$url = new RedirectedURL();
 		}
-		
+
 		$url->FromBase = $legacyUrl;
-		$url->To = $this->URLSegment;
+		$url->To = $this->RelativeLink();
 		$url->write();
 	}
 }
