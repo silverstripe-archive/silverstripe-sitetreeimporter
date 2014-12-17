@@ -68,20 +68,27 @@ a key named `LegacyURL` is found in the imported JSON data.
 
 ```php
 class Page extends SiteTree {
-	public function setLegacyURL($legacyUrl) {
+	public function setLegacyURL($url) {
+		$url = Director::makeRelative($url);
+		$urlBase = parse_url($url, PHP_URL_PATH);
+		$urlQuerystring = parse_url($url, PHP_URL_QUERY);
+
+		$urlObj = RedirectedURL::get()->filter(array(
+			'FromBase' => $urlBase,
+			'FromQuerystring' => $urlQuerystring
+		))->First();
+		if(!$urlObj) {
+			 $urlObj = new RedirectedURL();
+		}
+		$urlObj->FromBase = $urlBase;
+		$urlObj->FromQuerystring = $urlQuerystring;
+
 		if(!$this->URLSegment) {
-			$this->URLSegment = $this->generateURLSegment();
-			$this->write();
+			$this->URLSegment = $this->generateURLSegment($this->Title);
 		}
+		$urlObj->To = $this->RelativeLink();
 
-		$url = RedirectedURL::get()->find('FromBase', $legacyUrl);
-		if(!$url) {
-			$url = new RedirectedURL();
-		}
-
-		$url->FromBase = $legacyUrl;
-		$url->To = $this->RelativeLink();
-		$url->write();
+		$urlObj->write();
 	}
 }
 ```
