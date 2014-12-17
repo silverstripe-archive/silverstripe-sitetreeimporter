@@ -83,39 +83,22 @@ HTML;
 			// Skip comments
 			if(preg_match('/^#/', $line)) continue;
 
-			if(preg_match("/^(\t*)([^\t].*)/", $line, $matches)) {
+			// Split up indentation, title and optional JSON
+			if(preg_match("/^(\t*)([^{]*)({.*})?/", $line, $matches)) {
 				$numTabs = strlen($matches[1]);
 				$title = trim($matches[2]);
-				$json = null;
-				$urlsegment = null;
-				$json = null;
-				$decodedJson = null;
+				$json = (isset($matches[3]) && trim($matches[3])) ? json_decode(trim($matches[3]), true) : array();
 
-				// e.g. http://regexr.com/39u7j
-				preg_match('/(.*)(?:\s)({.*})?$/', $title, $matches);
+				// Either extract the URL from provided meta data, or generate it
+				$url = (array_key_exists('URLSegment', $json)) ? $json['URLSegment'] : $title;
+				$url = Convert::raw2url($url);
 
-				if($matches) {
-					$title = $matches[1];
-					if($matches[2]) {
-						$json = $matches[2];
-						$decodedJson = json_decode($json, true);
-						if(array_key_exists('URLSegment', $decodedJson)) {
-							$urlsegment = $decodedJson['URLSegment'];
-						}
-					}
-				}
+				// Allow custom classes based on meta data
+				$className = (array_key_exists('ClassName', $json)) ? $json['ClassName'] : 'Page';
 
-				// try to find the existing page by matching the URLsegment generated from the imported page title
-				$page = DataObject::get_one('SiteTree', sprintf('"URLSegment"=\'%s\'', Convert::raw2url($title)));
-
-				// page not found, create a new page
-				if(!$page) {
-					$page = new Page();
-					$page->Title = Convert::raw2xml($title);
-					if($urlsegment) {
-						$page->URLSegment = Convert::raw2url($urlsegment);
-					}
-				}
+				// Try to find an existing page, or create a new one
+				$page = Page::get()->find('URLSegment', $url);
+				if(!$page) $page = new $className();
 
 				// If we've got too many tabs, then outdent until we find a page to attach to.
 				while(!isset($parentRefs[$numTabs-1]) && $numTabs > 0) $numTabs--;
@@ -123,13 +106,17 @@ HTML;
 				// Set parent based on parentRefs;
 				if($numTabs > 0) $page->ParentID = $parentRefs[$numTabs-1];
 
-				// Apply any json data properties to the page
-				if($decodedJson) {
-					$page->update($decodedJson);
-				}
+				// Apply any meta data properties to the page
+				if($json) $page->update($json);
+				$page->Title = $title;
+				$page->URLSegment = $url;
 
 				$page->write();
-				if(isset($data['PublishAll']) && $data['PublishAll']) $page->publish('Stage', 'Live');
+
+				// Optionall publish
+				if(isset($data['PublishAll']) && $data['PublishAll']) {
+					$page->publish('Stage', 'Live');
+				}
 
 				if(!SapphireTest::is_running_test()) {
 					echo "<li>Written ID# $page->ID: $page->Title";
@@ -139,12 +126,17 @@ HTML;
 
 				// Populate parentRefs with the most recent page at every level.   Necessary to build tree
 				// Children of home should be placed at the top level
-				if(strtolower($title) == 'home') $parentRefs[$numTabs] = 0;
-				else $parentRefs[$numTabs] = $page->ID;
+				if(strtolower($title) == 'home') {
+					$parentRefs[$numTabs] = 0;
+				} else {
+					$parentRefs[$numTabs] = $page->ID;
+				}
 
 				// Remove no-longer-relevant children from the parentRefs.  Allows more graceful acceptance of files
 				// with errors
-				for($i=sizeof($parentRefs)-1;$i>$numTabs;$i--) unset($parentRefs[$i]);
+				for($i=sizeof($parentRefs)-1;$i>$numTabs;$i--) {
+					unset($parentRefs[$i]);
+				}
 
 				// Memory cleanup
 				$page->destroy();

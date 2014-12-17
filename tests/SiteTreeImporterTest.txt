@@ -3,5 +3,5 @@ Parent1
 Parent2
 	Child2_1
 		Grandchild2_1_1
-	Child2_2 {"URLSegment": "my-url", "MenuTitle": "my-menu-title"}
+	Child2_2 {"URLSegment": "my-url", "MenuTitle": "my-menu-title", "ClassName": "SiteTreeImporterTest_TestPage"}
 Parent3
