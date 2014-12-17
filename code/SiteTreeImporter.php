@@ -68,13 +68,14 @@ HTML;
 	function bulkimport($data, $form) {
 		$fh = fopen($data['SourceFile']['tmp_name'],'r');
 
-		if(isset($data['DeleteExisting']) && $data['DeleteExisting']) {
-			// TODO Remove subtables
-			DB::query('DELETE FROM "SiteTree"');
-			DB::query('DELETE FROM "SiteTree_Live"');
-		}
-
 		Versioned::reading_stage('Stage');
+
+		if(isset($data['DeleteExisting']) && $data['DeleteExisting']) {
+			foreach(Page::get() as $page) {
+				$page->deleteFromStage('Stage');
+				$page->deleteFromStage('Live');
+			}
+		}
 
 		$parentRefs = array();
 
