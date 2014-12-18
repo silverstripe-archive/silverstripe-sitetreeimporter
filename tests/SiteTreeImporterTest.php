@@ -120,6 +120,33 @@ YML;
 		$this->assertEquals($child2_2->ClassName, 'SiteTreeImporterTest_TestPage');
 	}
 
+	function testDetectsDuplicatesByParent() {
+		$page = new Page();
+		$page->Title = 'MyPage';
+		$page->URLSegment = 'mypage';
+		$page->write();
+		$page->publish('Stage', 'Live');
+
+		// Import page with same name but a different hierarchy
+		$data = <<<YML
+Parent
+	MyPage
+YML;
+		$this->import($data);
+
+		$pages = Page::get()->filter('Title', 'MyPage')->sort('Created');
+		
+		$existingPage = $pages->filter('ID', $page->ID)->First();
+		$this->assertNotNull($existingPage);
+		$this->assertEquals($existingPage->Title, 'MyPage');
+		$this->assertEquals((int)$existingPage->ParentID, (int)$page->ParentID);
+		
+		$newPage = $pages->exclude('ID', $page->ID)->First();
+		$this->assertNotNull($newPage);
+		$this->assertEquals($newPage->Title, 'MyPage');
+		$this->assertNotEquals((int)$newPage->ParentID, (int)$page->ParentID);
+	}
+
 	protected function import($yml, $data = null) {
 		$data = $data ? $data : array();
 		$data['SourceFile'] = array();

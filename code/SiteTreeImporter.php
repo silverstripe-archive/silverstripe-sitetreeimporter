@@ -89,17 +89,20 @@ HTML;
 				// Allow custom classes based on meta data
 				$className = (array_key_exists('ClassName', $json)) ? $json['ClassName'] : 'Page';
 
-				// Try to find an existing page, or create a new one
-				$page = Page::get()->find('URLSegment', $url);
-				if(!$page) $page = new $className();
-
 				// If we've got too many tabs, then outdent until we find a page to attach to.
 				while(!isset($parentRefs[$numTabs-1]) && $numTabs > 0) $numTabs--;
 
-				// Set parent based on parentRefs;
-				if($numTabs > 0) $page->ParentID = $parentRefs[$numTabs-1];
+				$parentID = ($numTabs > 0) ? $parentRefs[$numTabs-1] : 0;
+
+				// Try to find an existing page, or create a new one
+				$page = Page::get()->filter(array(
+					'URLSegment' => $url,
+					'ParentID' => $parentID
+				))->First();
+				if(!$page) $page = new $className();
 
 				// Apply any meta data properties to the page
+				$page->ParentID = $parentID;
 				$page->Title = $title;
 				$page->URLSegment = $url;
 				if($json) $page->update($json);
