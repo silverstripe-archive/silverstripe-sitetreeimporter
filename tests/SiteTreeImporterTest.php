@@ -13,12 +13,16 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$page->Title = 'ShouldBeExisting';
 		$page->write();
 
-		$data = array();
-		$data['SourceFile'] = array();
-		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
-
-		$importer = singleton('SiteTreeImporter');
-		$importer->bulkimport($data, null);
+		$data = <<<YML
+# Comments are skipped
+Parent1
+Parent2
+	Child2_1
+		Grandchild2_1_1
+	Child2_2
+Parent3
+YML;
+		$this->import($data);
 
 		$existing = Page::get()->find('Title', 'ShouldBeExisting');
 		$parent1 = Page::get()->find('Title', 'Parent1');
@@ -41,13 +45,15 @@ class SiteTreeImporterTest extends FunctionalTest {
 	}
 
 	function testImportPublishAll() {
-		$data = array();
-		$data['PublishAll'] = '1';
-		$data['SourceFile'] = array();
-		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
-
-		$importer = singleton('SiteTreeImporter');
-		$importer->bulkimport($data, null);
+		$data = <<<YML
+Parent1
+Parent2
+	Child2_1
+		Grandchild2_1_1
+	Child2_2
+Parent3
+YML;
+		$this->import($data, array('PublishAll' => 1));
 
 		$parent1 = Versioned::get_one_by_stage('Page', 'Live', "\"Title\" = 'Parent1'");
 		$parent2 = Versioned::get_one_by_stage('Page', 'Live', "\"Title\" = 'Parent2'");
@@ -70,25 +76,21 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$page->Title = 'ShouldBeDeleted';
 		$page->write();
 
-		$data = array();
-		$data['DeleteExisting'] = '1';
-		$data['SourceFile'] = array();
-		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
-
-		$importer = singleton('SiteTreeImporter');
-		$importer->bulkimport($data, null);
+		$data = <<<YML
+Parent1
+YML;
+		$this->import($data, array('DeleteExisting' => 1));
 
 		$this->assertInstanceOf('Page', Page::get()->find('Title', 'Parent1'));
 		$this->assertNull(Page::get()->find('Title', 'ShouldBeDeleted'));
 	}
 
 	function testImportSkipsComments() {
-		$data = array();
-		$data['SourceFile'] = array();
-		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
-
-		$importer = singleton('SiteTreeImporter');
-		$importer->bulkimport($data, null);
+		$data = <<<YML
+# Comments are skipped
+Parent1
+YML;
+		$this->import($data);
 
 		$this->assertNull(Page::get()->find('Title', '# Comments are skipped'));
 	}
@@ -101,18 +103,33 @@ class SiteTreeImporterTest extends FunctionalTest {
 		$page->write();
 		$page->publish('Stage', 'Live');
 
-		$data = array();
-		$data['SourceFile'] = array();
-		$data['SourceFile']['tmp_name'] = BASE_PATH . '/sitetreeimporter/tests/SiteTreeImporterTest.txt';
-
-		$importer = singleton('SiteTreeImporter');
-		$importer->bulkimport($data, null);
+		$data = <<<YML
+Parent1
+Parent2
+	Child2_1
+		Grandchild2_1_1
+	Child2_2 {"URLSegment": "my-url", "MenuTitle": "my-menu-title", "ClassName": "SiteTreeImporterTest_TestPage"}
+Parent3
+YML;
+		$this->import($data);
 
 		$child2_2 = Page::get()->find('Title', 'Child2_2');
 		$this->assertInstanceOf('Page', $child2_2);
 		$this->assertEquals($child2_2->URLSegment, 'my-url');
 		$this->assertEquals($child2_2->MenuTitle, 'my-menu-title');
 		$this->assertEquals($child2_2->ClassName, 'SiteTreeImporterTest_TestPage');
+	}
+
+	protected function import($yml, $data = null) {
+		$data = $data ? $data : array();
+		$data['SourceFile'] = array();
+		$tmpFile = tempnam('SiteTreeImporterTest', 'SiteTreeImporterTest');
+		file_put_contents($tmpFile, $yml);
+		$data['SourceFile']['tmp_name'] = $tmpFile;
+		$importer = new SiteTreeImporter();
+		$response = $importer->bulkimport($data, null);
+		unlink($tmpFile);
+
 	}
 }
 
