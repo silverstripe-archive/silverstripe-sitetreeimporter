@@ -4,7 +4,7 @@
 
 ## Requirements
 
- * SilverStripe 3.0 or later
+ * SilverStripe 3.1 or later
 
 ## Installation
 
