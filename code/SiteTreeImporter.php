@@ -100,9 +100,9 @@ HTML;
 				if($numTabs > 0) $page->ParentID = $parentRefs[$numTabs-1];
 
 				// Apply any meta data properties to the page
-				if($json) $page->update($json);
 				$page->Title = $title;
 				$page->URLSegment = $url;
+				if($json) $page->update($json);
 
 				$page->write();
 
