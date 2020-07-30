@@ -1,20 +1,31 @@
 <?php
+use SilverStripe\CMS\Controllers\ContentController;
+use SilverStripe\Core\Convert;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\PermissionProvider;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FileField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Versioned\Versioned;
+use SilverStripe\Dev\Debug;
+
 /**
  * Generate or update pages in the site-tree from a tab indented text file.
  *
  * Data fields on the pages can be populated, or updated for existing pages, via
  * specifying json encoded properties for each item in the tabbed import file.
  */
-class SiteTreeImporter extends Controller
+class SiteTreeImporter extends ContentController
 {
-    
-    public static $allowed_actions = array(
+    private static $allowed_actions = array(
         'Form',
         'bulkimport',
         'complete'
     );
 
-    public function init()
+    protected function init()
     {
         parent::init();
         if (!Permission::check('ADMIN')) {
@@ -36,7 +47,7 @@ class SiteTreeImporter extends Controller
 
 <pre>
 Home
-About {"URLSegment": "about-us", "MetaDescription": "About our company"}
+About {"URLSegment": "about-us", "Label": "About Us", "MetaDescription": "About our company"}
 	Staff
 		Sam
 		Sig
@@ -69,7 +80,7 @@ HTML;
     {
         $fh = fopen($data['SourceFile']['tmp_name'], 'r');
 
-        Versioned::reading_stage('Stage');
+        Versioned::set_stage('Stage');
 
         if (isset($data['DeleteExisting']) && $data['DeleteExisting']) {
             foreach (Page::get() as $page) {
@@ -130,13 +141,11 @@ HTML;
                     $page->publish('Stage', 'Live');
                 }
 
-                if (!SapphireTest::is_running_test()) {
-                    echo "<li>Written ID# $page->ID: $page->Title";
-                    if ($page->ParentID) {
-                        echo " (ParentID# $page->ParentID)";
-                    }
-                    echo "</li>";
-                }
+				echo "<li>Written ID# $page->ID: $page->Title";
+				if ($page->ParentID) {
+					echo " (ParentID# $page->ParentID)";
+				}
+				echo "</li>";
 
                 // Populate parentRefs with the most recent page at every level.   Necessary to build tree
                 // Children of home should be placed at the top level
@@ -158,12 +167,9 @@ HTML;
             }
         }
 
-        if (!SapphireTest::is_running_test()) {
-            $complete = $this->complete();
-            echo $complete['Content'];
-        } else {
-            $this->redirect($this->Link() . 'complete');
-        }
+		$complete = $this->complete();
+		echo $complete['Content'];
+
     }
 
     public function complete()
